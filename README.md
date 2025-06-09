@@ -46,8 +46,8 @@ To download the Magento source code, Composer needs your authentication keys fro
      {  
          "http-basic": {  
              "repo.magento.com": {  
-                 "username": "YOUR\_PUBLIC\_KEY\_HERE",  
-                 "password": "YOUR\_PRIVATE\_KEY\_HERE"  
+                 "username": "YOUR_PUBLIC_KEY_HERE",  
+                 "password": "YOUR_PRIVATE_KEY_HERE"  
              }  
          }  
      }
