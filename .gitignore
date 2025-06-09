@@ -1,0 +1,15 @@
+# Ignore the entire Magento source code directory.
+# This will be downloaded by Composer on new setups.
+/src/
+
+# Ignore sensitive credentials. This file must be created manually on each new machine.
+/auth.json
+
+# Ignore Docker named volume data if it ever gets mapped locally
+/volumes/
+
+# Ignore common OS and IDE files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

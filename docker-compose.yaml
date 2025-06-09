@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./src:/var/www/html:delegated
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - php
+
+  php:
+    build:
+      context: ./docker/php
+    volumes:
+      - ./src:/var/www/html:delegated
+      - ./auth.json:/root/.composer/auth.json:ro
+
+  db:
+    image: mariadb:10.6
+    environment:
+      - MARIADB_ROOT_PASSWORD=magentoroot
+      - MARIADB_DATABASE=magento
+      - MARIADB_USER=magento
+      - MARIADB_PASSWORD=magento
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    environment:
+      - "discovery.type=single-node"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx1g"
+      - "network.publish_host=opensearch"
+      - "node.name=magento-node-1"
+      - "plugins.security.disabled=true"
+    volumes:
+      - opensearchdata:/usr/share/opensearch/data
+
+volumes:
+  dbdata:
+  opensearchdata:
