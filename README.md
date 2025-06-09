@@ -95,24 +95,24 @@ These commands execute inside the PHP container to download, set permissions for
 
 3. **Run the Magento Installer:**  
    ```bash
-   docker-compose exec php bin/magento setup:install \\  
-      \--base-url=\[https://magento.test/\](https://magento.test/) \\  
-      \--db-host=db \\  
-      \--db-name=magento \\  
-      \--db-user=magento \\  
-      \--db-password=magento \\  
-      \--admin-firstname=Admin \\  
-      \--admin-lastname=User \\  
-      \--admin-email=admin@example.com \\  
-      \--admin-user=admin \\  
-      \--admin-password=Password123 \\  
-      \--language=en\_US \\  
-      \--currency=USD \\  
-      \--timezone=America/Chicago \\  
-      \--use-rewrites=1 \\  
-      \--search-engine=opensearch \\  
-      \--opensearch-host=opensearch \\  
-      \--opensearch-port=9200
+   docker-compose exec php bin/magento setup:install \
+      --base-url=https://magento.test/ \
+      --db-host=db \
+      --db-name=magento \
+      --db-user=magento \
+      --db-password=magento \
+      --admin-firstname=Admin \
+      --admin-lastname=User \
+      --admin-email=admin@example.com \
+      --admin-user=admin \
+      --admin-password=Password123 \
+      --language=en_US \
+      --currency=USD \
+      --timezone=America/Chicago \
+      --use-rewrites=1 \
+      --search-engine=opensearch \
+      --opensearch-host=opensearch \
+      --opensearch-port=9200
    ```
 
 ### **6\. Post-Installation Configuration**
@@ -135,7 +135,7 @@ After the installation is complete, a few final commands are needed to configure
 
 2. **Deploy Static Content:**  
    ```
-   ./dev/brandon/run.sh setup:static-content:deploy \-f
+   ./dev/brandon/run.sh setup:static-content:deploy -f
    ```
 
 3. **Fix File Permissions:** This is crucial after generating static files. Use option 4 in the helper script.  
