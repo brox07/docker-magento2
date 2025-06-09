@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+# A wrapper script to run bin/magento commands inside the PHP container.
+# Forwards all arguments directly to the Magento CLI.
+#
+# Example: ./bin/magento cache:flush
+
+exec docker-compose exec php bin/magento "$@"

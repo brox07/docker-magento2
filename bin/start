@@ -1,0 +1,5 @@
+#!/bin/bash
+# Starts the Docker environment in the background.
+echo "Starting Docker services..."
+docker-compose up -d
+echo "Environment started."

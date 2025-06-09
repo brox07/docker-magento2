@@ -1,0 +1,6 @@
+#!/bin/bash
+# Opens a bash shell inside the PHP container.
+
+# The -u www-data flag ensures you are logged in as the web user
+# which can help prevent file permission issues.
+exec docker-compose exec -u www-data php bash

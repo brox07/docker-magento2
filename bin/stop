@@ -1,0 +1,5 @@
+#!/bin/bash
+# Stops the Docker environment.
+echo "Stopping Docker services..."
+docker-compose down
+echo "Environment stopped."
