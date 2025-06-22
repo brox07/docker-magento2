@@ -9,35 +9,51 @@ C_GREEN='\033[0;32m'
 C_BLUE='\033[0;34m'
 C_YELLOW='\033[0;33m'
 
+# --- Configuration ---
+MAGENTO_USER="www-data"
+
 # --- Helper Functions ---
 
-# Function to run Magento commands
+## --- MODIFIED --- ##
+# Runs Magento commands as the correct web server user to prevent permissions errors.
 m() {
-    echo -e "${C_BLUE}Running: docker-compose exec php bin/magento $@${C_RESET}"
-    docker-compose exec php bin/magento "$@"
+    echo -e "${C_BLUE}Running as user '${MAGENTO_USER}': bin/magento $@${C_RESET}"
+    docker-compose exec --user "${MAGENTO_USER}" php bin/magento "$@"
 }
 
-# Function to fix file permissions on the src/ directory
+## --- MODIFIED --- ##
+# Fixes file permissions from within the PHP container. No sudo needed on the host.
 fix_permissions() {
-    echo -e "\n${C_YELLOW}Fixing filesystem ownerships and permissions...${C_RESET}"
-    sudo chown -R www-data:www-data src/
-    sudo find src/ -type d -exec chmod 775 {} \;
-    sudo find src/ -type f -exec chmod 664 {} \;
-    sudo chmod +x src/bin/magento
+    echo -e "\n${C_YELLOW}Fixing filesystem ownerships and permissions inside the container...${C_RESET}"
+    # This command now includes making bin/magento executable
+    docker-compose exec php bash -c "chown -R www-data:www-data app/etc var generated pub/static pub/media && find . -type d -exec chmod 775 {} \; && find . -type f -exec chmod 664 {} \; && chmod +x bin/magento"
     echo -e "${C_GREEN}Permissions fixed!${C_RESET}"
 }
 
 # --- Main Script Logic ---
+
+## --- NEW --- ##
+# If arguments are passed directly to the script, run them as a custom command and exit.
+if [ "$#" -gt 0 ]; then
+    m "$@"
+    exit 0
+fi
+
+# If no arguments are provided, show the interactive menu.
 echo -e "${C_GREEN}=====================================${C_RESET}"
 echo -e "${C_GREEN}  Brandon's Magento Dev Helper       ${C_RESET}"
 echo -e "${C_GREEN}=====================================${C_RESET}"
 echo "1. Run a custom 'bin/magento' command"
-echo "2. Full Clean & Recompile (the works!)"
-echo "3. Restart Docker Environment (down and up)"
-echo "4. Fix File Permissions"
-echo "5. Exit"
+echo "2. Flush Magento Cache"
+echo "3. Run Setup Upgrade"
+echo "4. Run DI Compile"
+echo "5. Fix File Permissions"
+echo "6. Get a shell as '${MAGENTO_USER}'"
+echo "7. Get a shell as 'root'"
+echo "8. Restart Docker Environment (down and up)"
+echo "9. Exit"
 echo -e "-------------------------------------"
-read -p "Please select an option [1-5]: " choice
+read -p "Please select an option [1-9]: " choice
 
 case $choice in
     1)
@@ -50,28 +66,26 @@ case $choice in
         fi
         ;;
     2)
-        echo -e "${C_YELLOW}-------------------------------------${C_RESET}"
-        echo -e "${C_BLUE}Starting full clean and recompile process...${C_RESET}"
-        
-        echo -e "\n${C_YELLOW}Step 1: Removing generated files...${C_RESET}"
-        sudo rm -rf src/generated/* src/var/view_preprocessed/* src/pub/static/frontend/* src/pub/static/adminhtml/*
-        echo -e "${C_GREEN}Generated files cleared.${C_RESET}"
-
-        echo -e "\n${C_YELLOW}Step 2: Running setup:upgrade...${C_RESET}"
-        m setup:upgrade
-
-        echo -e "\n${C_YELLOW}Step 3: Running setup:di:compile...${C_RESET}"
-        m setup:di:compile
-        
-        # Automatically fix permissions after generating code
-        fix_permissions
-
-        echo -e "\n${C_YELLOW}Step 4: Cleaning cache...${C_RESET}"
-        m cache:clean
-        
-        echo -e "\n${C_GREEN}Process complete!${C_RESET}"
+        m "cache:flush"
         ;;
     3)
+        m "setup:upgrade"
+        ;;
+    4)
+        m "setup:di:compile"
+        ;;
+    5)
+        fix_permissions
+        ;;
+    6)
+        echo -e "${C_BLUE}Opening a shell as '${MAGENTO_USER}'... Type 'exit' to leave.${C_RESET}"
+        docker-compose exec --user "${MAGENTO_USER}" php bash
+        ;;
+    7)
+        echo -e "${C_BLUE}Opening a shell as 'root'... Type 'exit' to leave.${C_RESET}"
+        docker-compose exec php bash
+        ;;
+    8)
         echo -e "${C_YELLOW}-------------------------------------${C_RESET}"
         echo -e "${C_BLUE}Bringing Docker environment down...${C_RESET}"
         docker-compose down
@@ -79,11 +93,7 @@ case $choice in
         docker-compose up -d
         echo -e "\n${C_GREEN}Environment restarted!${C_RESET}"
         ;;
-    4)
-        # New option to just fix permissions
-        fix_permissions
-        ;;
-    5)
+    9)
         echo "Exiting."
         exit 0
         ;;
